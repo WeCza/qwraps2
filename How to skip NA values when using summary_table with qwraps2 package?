@@ -1,0 +1,51 @@
+0
+
+
+I am trying to make a Baseline Characteristics Tables with qwraps2. My data is :
+
+> str(joined_df2)
+'data.frame':   259 obs. of  23 variables:
+ $ SUBJID  : chr  "S001011" "S001013" "S001016" "S001017" ...
+ $ AGE     : num  72 74 65 46 59 71 71 64 63 58 ...
+ $ TRTP2   : chr  "Treatment B" "Treatment A" "Treatment B" "Treatment B" ...
+ 
+I would like to include mean (SD), median, min, max value of the variable AGE and group it by TRTP2 . The variable AGE contains two NA values:
+
+> joined_df2[is.na(joined_df2$ AGE),]
+     SUBJID AGE AGEU FASFL.x SAFFL TRT01P HGTBL HGTBLU WGTBL WGTBLU DIABDUR DIABDURU FASFL.y        TRTP            AVISIT VISITNUM           PARAM PARAMCD AVAL AVALU ANL01FL ANL01REA       TRTP2
+18  S001054  NA <NA>    <NA>  <NA>   <NA>    NA   <NA>    NA   <NA>      NA     <NA>       Y Treatment A Visit 10 (Week 0)       10 HbA1c Blood (%) C64849B  8.4     %       Y     <NA> Treatment A
+146 S051018  NA <NA>    <NA>  <NA>   <NA>    NA   <NA>    NA   <NA>      NA     <NA>       Y Treatment A Visit 10 (Week 0)       10 HbA1c Blood (%) C64849B  7.4     %       Y     <NA> Treatment A
+
+When I am running a code, I am getting an error in quantile.default:
+
+> library(qwraps2)
+> options(qwraps2_markup = 'markdown') # default is latex
+
+> joined_df2_summaries <-
++   list("Age (yrs)" =
++          list(
++            "Mean (SD)"    = ~ qwraps2::mean_sd(AGE, denote_sd = "paren"),
++            "Median"       = ~ qwraps2::median_iqr(AGE),
++            "Min:"         = ~ min(AGE),
++            "Max:"         = ~ max(AGE)))
+
+> summary_table(dplyr::group_by(joined_df2, TRTP2), joined_df2_summaries)
+Error in quantile.default(x, probs = c(1, 3)/4, na.rm = na_rm) : 
+  missing values and NaN's not allowed if 'na.rm' is FALSE
+
+
+I tried to use na.rm=TRUE inside, but it does not help:
+
+> joined_df2_summaries <-
++   list("Age (yrs)" =
++          list(
++            "Mean (SD)"    = ~ qwraps2::mean_sd(AGE, denote_sd = "paren", na.rm=TRUE),
++            "Median"       = ~ qwraps2::median_iqr(AGE, na.rm=TRUE),
++            "Min:"         = ~ min(AGE, na.rm=TRUE),
++            "Max:"         = ~ max(AGE, na.rm=TRUE)))
+> summary_table(dplyr::group_by(joined_df2, TRTP2), joined_df2_summaries)
+Error in qwraps2::mean_sd(AGE, denote_sd = "paren", na.rm = TRUE) : 
+  unused argument (na.rm = TRUE)
+  
+  
+How can I calculate mean, etc. of AGE excluding NA values?
